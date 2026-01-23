@@ -1,0 +1,15 @@
+version: '3.8'
+services:
+  mtproxy:
+    image: telegrammessenger/proxy:latest
+    container_name: mtproxy
+    environment:
+      - SECRET=${SECRET}
+    ports:
+      - "443:443"
+    restart: unless-stopped
+    logging:
+      driver: "json-file"
+      options:
+        max-size: "10m"
+        max-file: "10"
