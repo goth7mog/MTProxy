@@ -1,6 +1,5 @@
 # .gitignore for sensitive and environment files
 .env
-useful.md
 secrets.auto.tfvars
 .terraform/
 terraform.tfvars
