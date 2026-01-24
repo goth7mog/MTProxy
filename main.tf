@@ -11,8 +11,7 @@ terraform {
 }
 
 provider "digitalocean" {
-  # You must set the DIGITALOCEAN_TOKEN environment variable or provide the token here
-  token = var.digitalocean_token != "" ? var.digitalocean_token : (try(env.DIGITALOCEAN_TOKEN, ""))
+  token = var.digitalocean_token
 }
 
 resource "digitalocean_droplet" "web" {
