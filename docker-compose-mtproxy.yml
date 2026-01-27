@@ -1,0 +1,14 @@
+version: '3.8'
+services:
+  mtproxy:
+    image: telegrammessenger/proxy:latest
+    container_name: mtproxy
+    environment:
+      - SECRET=${SECRET}
+    ports:
+      - "443:443"
+    restart: unless-stopped
+    volumes:
+      - ./logs:/logs
+    command: >
+      sh -c "./run_mtproxy.sh 2>&1 | tee /logs/mtproxy.log"
