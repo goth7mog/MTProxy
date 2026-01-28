@@ -4,8 +4,8 @@ services:
     image: shadowsocks/shadowsocks-libev:latest
     container_name: shadowsocks-server
     ports:
-      - "443:443/tcp"
-      - "443:443/udp"
+      - "443:8388/tcp"
+      - "443:8388/udp"
     environment:
       - PASSWORD=${SHADOWSOCKS_PASSWORD}
       - METHOD=${SHADOWSOCKS_METHOD}
