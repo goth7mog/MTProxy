@@ -9,3 +9,5 @@ services:
     environment:
       - PASSWORD=${SHADOWSOCKS_PASSWORD}
       - METHOD=${SHADOWSOCKS_METHOD}
+      - PLUGIN=v2ray-plugin
+      - PLUGIN_OPTS=server;tls;host=${DOMAIN};path=/ws
