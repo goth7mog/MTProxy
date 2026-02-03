@@ -36,14 +36,12 @@ resource "digitalocean_droplet" "web" {
     package_update: true
     package_upgrade: true
     runcmd:
-      - apt-get install -y apt-transport-https ca-certificates curl software-properties-common
-      - curl -fsSL https://download.docker.com/linux/ubuntu/gpg | apt-key add -
-      - add-apt-repository "deb [arch=amd64] https://download.docker.com/linux/ubuntu $(lsb_release -cs) stable"
-      - apt-get update
-      - apt-get install -y docker-ce
-      - usermod -aG docker ubuntu
-      - curl -L "https://github.com/docker/compose/releases/latest/download/docker-compose-$(uname -s)-$(uname -m)" -o /usr/local/bin/docker-compose
-      - chmod +x /usr/local/bin/docker-compose
+      # Install Chef client
+      - curl -L https://omnitruck.chef.io/install.sh | bash
+      # Download Chef recipe for Docker and Docker Compose
+      - curl -o /tmp/docker-chef.rb https://raw.githubusercontent.com/goth7mog/MTProxy/main/docker-chef.rb
+      # Run Chef recipe
+      - chef-apply /tmp/docker-chef.rb
   EOF
 }
 
