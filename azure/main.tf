@@ -95,3 +95,9 @@ variable "shadowsocks_method" {
 #   description = "Plugin options for v2ray-plugin."
 #   type        = string
 # }
+
+# Output the URL of the container app
+output "container_app_url" {
+  description = "The FQDN (URL) of the Azure Container App."
+  value       = azurerm_container_app.shadowsocks.latest_revision_fqdn
+}
