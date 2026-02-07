@@ -101,3 +101,9 @@ output "container_app_url" {
   description = "The FQDN (URL) of the Azure Container App."
   value       = azurerm_container_app.shadowsocks.latest_revision_fqdn
 }
+
+# Output the public IP address of the Azure Container App
+output "container_app_ip" {
+  description = "The public IP address of the Azure Container App."
+  value       = azurerm_container_app.shadowsocks.ingress[0].fqdn
+}
