@@ -18,67 +18,64 @@ provider "azurerm" {
   subscription_id = "584f8a59-dcda-4698-a720-39e3963a9708"
 }
 
+data "azurerm_client_config" "current" {}
+
 # Resource Group
 resource "azurerm_resource_group" "vpn_rg" {
   name     = "shadowsocks-rg"
   location = "switzerlandnorth"
 }
 
-# Container App Environment
-resource "azurerm_container_app_environment" "vpn_env" {
-  name                = "shadowsocks-env"
-  location            = azurerm_resource_group.vpn_rg.location
-  resource_group_name = azurerm_resource_group.vpn_rg.name
+
+
+# Reference existing Resource Group from previous project
+data "azurerm_resource_group" "sce_rg" {
+  name = "sce-rg" # Update this to the actual name of your previous resource group if different
+}
+
+# Reference existing Container App Environment from previous project
+data "azurerm_container_app_environment" "vpn_env" {
+  name                = "sce-env"
+  resource_group_name = data.azurerm_resource_group.sce_rg.name
 }
 
 
-# Container App
-resource "azurerm_container_app" "shadowsocks" {
-  name                         = "shadowsocks-server"
-  container_app_environment_id = azurerm_container_app_environment.vpn_env.id
-  resource_group_name          = azurerm_resource_group.vpn_rg.name
-  location                     = azurerm_resource_group.vpn_rg.location
-  revision_mode                = "Single"
 
-  template {
-    min_replicas = 1
-    max_replicas = 1
+# Container Instance for Shadowsocks
+resource "azurerm_container_group" "shadowsocks" {
+  name                = "shadowsocks-server"
+  location            = azurerm_resource_group.vpn_rg.location
+  resource_group_name = azurerm_resource_group.vpn_rg.name
+  os_type             = "Linux"
 
-    container {
-      name   = "shadowsocks"
-      image  = "shadowsocks/shadowsocks-libev:latest"
-      cpu    = 0.25
-      memory = "0.5Gi"
-      env {
-        name  = "PASSWORD"
-        value = var.shadowsocks_password
-      }
-      env {
-        name  = "METHOD"
-        value = var.shadowsocks_method
-      }
-      #   env {
-      #     name  = "PLUGIN"
-      #     value = "v2ray-plugin"
-      #   }
-      #   env {
-      #     name  = "PLUGIN_OPTS"
-      #     value = var.plugin_opts
-      #   }
+
+  container {
+    name   = "shadowsocks"
+    image  = "shadowsocks/shadowsocks-libev:latest"
+    cpu    = 0.25
+    memory = 0.5
+    environment_variables = {
+      PASSWORD = var.shadowsocks_password
+      METHOD   = var.shadowsocks_method
+      # Uncomment and set if needed:
+      # PLUGIN = "v2ray-plugin"
+      # PLUGIN_OPTS = var.plugin_opts
+    }
+    ports {
+      port = 8388
     }
   }
 
-  ingress {
-    external_enabled = true
-    target_port      = 8388
-    exposed_port     = 443
-    transport        = "auto"
-    traffic_weight {
-      latest_revision = true
-      percentage      = 100
-    }
-  }
 
+  ip_address_type = "Public"
+  dns_name_label  = "shadowsocks-${random_string.dns.result}"
+}
+
+# Random string for DNS label
+resource "random_string" "dns" {
+  length  = 6
+  upper   = false
+  special = false
 }
 
 variable "shadowsocks_password" {
@@ -96,14 +93,14 @@ variable "shadowsocks_method" {
 #   type        = string
 # }
 
-# Output the URL of the container app
-output "container_app_url" {
-  description = "The FQDN (URL) of the Azure Container App."
-  value       = azurerm_container_app.shadowsocks.latest_revision_fqdn
+
+# Output the FQDN and IP of the Container Instance
+output "container_instance_fqdn" {
+  description = "The FQDN (URL) of the Azure Container Instance."
+  value       = azurerm_container_group.shadowsocks.fqdn
 }
 
-# Output the public IP address of the Azure Container App
-output "container_app_ip" {
-  description = "The public IP address of the Azure Container App."
-  value       = azurerm_container_app.shadowsocks.ingress[0].fqdn
+output "container_instance_ip" {
+  description = "The public IP address of the Azure Container Instance."
+  value       = azurerm_container_group.shadowsocks.ip_address
 }
