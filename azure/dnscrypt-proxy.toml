@@ -1,0 +1,33 @@
+# Minimal dnscrypt-proxy config for secure DNS (listen on 127.0.0.1:5053)
+server_names = ['cloudflare']
+listen_addresses = ['127.0.0.1:5053']
+max_clients = 250
+ipv4_servers = true
+ipv6_servers = false
+dnscrypt_servers = true
+doh_servers = true
+require_dnssec = false
+require_nolog = true
+require_nofilter = false
+block_ipv6 = false
+block_unqualified = true
+block_undelegated = true
+reject_any = true
+
+[query_log]
+enabled = false
+
+[blacklist]
+enabled = false
+
+[forwarding]
+enabled = false
+
+[cache]
+enabled = true
+
+[local_doh]
+enabled = false
+
+[static]
+# Empty
