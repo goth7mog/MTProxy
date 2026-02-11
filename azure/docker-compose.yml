@@ -6,10 +6,7 @@ services:
     ports:
       - "8388:8388/tcp"
       - "8388:8388/udp"
-    environment:
-      SHADOWSOCKS_METHOD: 
-      SHADOWSOCKS_PASSWORD: 
-    restart: unless-stopped
-    # Uncomment below to mount config for local testing
-    # volumes:
-    #   - ./dnscrypt-proxy.toml:/etc/dnscrypt-proxy.toml:ro
+    env_file:
+      - ../digitalocean/.env
+    volumes:
+      - ./dnscrypt-proxy.toml:/etc/dnscrypt-proxy.toml
