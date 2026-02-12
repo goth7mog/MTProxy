@@ -24,6 +24,14 @@ RUN apk add --no-cache wget ca-certificates tar && \
 # Copy dnscrypt-proxy config
 COPY dnscrypt-proxy.toml /etc/dnscrypt-proxy.toml
 
+# Create non-root user for security
+RUN addgroup -g 1000 shadowsocks && \
+    adduser -D -u 1000 -G shadowsocks shadowsocks && \
+    chown shadowsocks:shadowsocks /etc/dnscrypt-proxy.toml
+
+# Run as non-root user
+USER shadowsocks
+
 EXPOSE 8388/tcp 8388/udp
 
 ENTRYPOINT ["/bin/sh", "-c"]
