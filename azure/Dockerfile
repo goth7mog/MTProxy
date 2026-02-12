@@ -1,9 +1,9 @@
-# Dockerfile for Shadowsocks-libev with local DoH DNS proxy (cloudflared)
+# Dockerfile for Shadowsocks-libev with local DoH DNS proxy (dnscrypt-proxy)
 FROM shadowsocks/shadowsocks-libev:latest
 
 USER root
 
-# Install wget, ca-certificates, and dnscrypt-proxy
+# Install wget, ca-certificates, and dnscrypt-proxy with all necessary files
 RUN apk add --no-cache wget ca-certificates tar && \
     ARCH=$(uname -m) && \
     if [ "$ARCH" = "x86_64" ]; then \
