@@ -21,6 +21,21 @@ RUN apk add --no-cache wget ca-certificates tar && \
     chmod +x /usr/local/bin/dnscrypt-proxy && \
     rm -rf /tmp/dnscrypt-proxy*
 
+# Install ngrok
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then \
+    NGROK_URL="https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-amd64.tgz" ; \
+    elif [ "$ARCH" = "aarch64" ]; then \
+    NGROK_URL="https://bin.equinox.io/c/bNyj1mQVY4c/ngrok-v3-stable-linux-arm64.tgz" ; \
+    else \
+    echo "Unsupported architecture: $ARCH" && exit 1 ; \
+    fi && \
+    wget -O /tmp/ngrok.tgz "$NGROK_URL" && \
+    tar -xzf /tmp/ngrok.tgz -C /tmp && \
+    cp /tmp/ngrok /usr/local/bin/ && \
+    chmod +x /usr/local/bin/ngrok && \
+    rm -rf /tmp/ngrok*
+
 # Copy dnscrypt-proxy config
 COPY dnscrypt-proxy.toml /etc/dnscrypt-proxy.toml
 
