@@ -36,8 +36,13 @@ RUN ARCH=$(uname -m) && \
     chmod +x /usr/local/bin/ngrok && \
     rm -rf /tmp/ngrok*
 
+
 # Copy dnscrypt-proxy config
 COPY dnscrypt-proxy.toml /etc/dnscrypt-proxy.toml
+
+# Copy entrypoint script
+COPY entrypoint.sh /usr/local/bin/entrypoint.sh
+RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Create non-root user for security
 RUN addgroup -g 1000 shadowsocks && \
@@ -49,5 +54,4 @@ USER shadowsocks
 
 EXPOSE 8388/tcp 8388/udp
 
-ENTRYPOINT ["/bin/sh", "-c"]
-CMD ["dnscrypt-proxy -config /etc/dnscrypt-proxy.toml & sleep 2 && ss-server -s 0.0.0.0 -p 8388 -m ${SHADOWSOCKS_METHOD:-chacha20-ietf-poly1305} -k ${SHADOWSOCKS_PASSWORD:-password} -u -d 127.0.0.1:5053"]
+ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
