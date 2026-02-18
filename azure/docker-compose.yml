@@ -5,7 +5,7 @@ services:
     container_name: shadowsocks
     ports:
       - "8388:8388/tcp"
-      - "8388:8388/udp"
+      # - "8388:8388/udp" #Only tcp is needed with v2ray-plugin
     env_file:
       - ../digitalocean/.env
     volumes:
