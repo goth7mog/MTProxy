@@ -21,6 +21,23 @@ RUN apk add --no-cache wget ca-certificates tar && \
     chmod +x /usr/local/bin/dnscrypt-proxy && \
     rm -rf /tmp/dnscrypt-proxy*
 
+# Install v2ray-plugin
+RUN ARCH=$(uname -m) && \
+    if [ "$ARCH" = "x86_64" ]; then \
+    V2RAY_URL="https://github.com/shadowsocks/v2ray-plugin/releases/download/v1.3.2/v2ray-plugin-linux-amd64-v1.3.2.tar.gz" ; \
+    BINARY="v2ray-plugin_linux_amd64"; \
+    elif [ "$ARCH" = "aarch64" ]; then \
+    V2RAY_URL="https://github.com/shadowsocks/v2ray-plugin/releases/download/v1.3.2/v2ray-plugin-linux-arm64-v1.3.2.tar.gz" ; \
+    BINARY="v2ray-plugin_linux_arm64"; \
+    else \
+    echo "Unsupported architecture: $ARCH" && exit 1 ; \
+    fi && \
+    wget -O /tmp/v2ray-plugin.tar.gz "$V2RAY_URL" && \
+    tar -xzf /tmp/v2ray-plugin.tar.gz -C /tmp && \
+    mv /tmp/$BINARY /usr/local/bin/v2ray-plugin && \
+    chmod +x /usr/local/bin/v2ray-plugin && \
+    rm -rf /tmp/v2ray-plugin*
+
 # Install ngrok
 RUN ARCH=$(uname -m) && \
     if [ "$ARCH" = "x86_64" ]; then \
@@ -52,6 +69,6 @@ RUN addgroup -g 1000 shadowsocks && \
 # Run as non-root user
 USER shadowsocks
 
-EXPOSE 8388/tcp 8388/udp
+EXPOSE 8388/tcp
 
 ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
