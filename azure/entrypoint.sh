@@ -13,12 +13,8 @@ dnscrypt-proxy -config /etc/dnscrypt-proxy.toml &
 # Give dnscrypt-proxy time to start
 sleep 2
 
-# Start shadowsocks server
-exec ss-server \
-    -s 0.0.0.0 \
-    -p 8388 \
-    -m "${SHADOWSOCKS_METHOD}" \
-    -k "${SHADOWSOCKS_PASSWORD}" \
-    --plugin v2ray-plugin \
-    --plugin-opts "server;mode=websocket" \
-    -d 127.0.0.1:5053
+# Replace UUID placeholder with environment variable
+sed "s/__VLESS_UUID__/${VLESS_UUID}/g" /etc/xray-config.json > /tmp/xray-config.json
+
+# Start Xray with the updated config
+exec xray run -c /tmp/xray-config.json

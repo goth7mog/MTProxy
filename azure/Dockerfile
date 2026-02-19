@@ -1,11 +1,11 @@
-# Dockerfile for Shadowsocks-libev with local DoH DNS proxy (dnscrypt-proxy)
-FROM shadowsocks/shadowsocks-libev:latest
+FROM alpine:3.19
 
 USER root
 
-# Install wget, ca-certificates, and dnscrypt-proxy with all necessary files
-RUN apk add --no-cache wget ca-certificates tar && \
-    ARCH=$(uname -m) && \
+RUN apk add --no-cache wget ca-certificates tar
+
+# Install dnscrypt-proxy
+RUN ARCH=$(uname -m) && \
     if [ "$ARCH" = "x86_64" ]; then \
     DNSCRYPT_URL="https://github.com/DNSCrypt/dnscrypt-proxy/releases/download/2.1.15/dnscrypt-proxy-linux_x86_64-2.1.15.tar.gz" ; \
     DIR="linux-x86_64"; \
@@ -21,22 +21,20 @@ RUN apk add --no-cache wget ca-certificates tar && \
     chmod +x /usr/local/bin/dnscrypt-proxy && \
     rm -rf /tmp/dnscrypt-proxy*
 
-# Install v2ray-plugin
+# Install Xray-core
 RUN ARCH=$(uname -m) && \
     if [ "$ARCH" = "x86_64" ]; then \
-    V2RAY_URL="https://github.com/shadowsocks/v2ray-plugin/releases/download/v1.3.2/v2ray-plugin-linux-amd64-v1.3.2.tar.gz" ; \
-    BINARY="v2ray-plugin_linux_amd64"; \
+    XRAY_URL="https://github.com/XTLS/Xray-core/releases/download/v1.8.8/Xray-linux-64.zip" ; \
     elif [ "$ARCH" = "aarch64" ]; then \
-    V2RAY_URL="https://github.com/shadowsocks/v2ray-plugin/releases/download/v1.3.2/v2ray-plugin-linux-arm64-v1.3.2.tar.gz" ; \
-    BINARY="v2ray-plugin_linux_arm64"; \
+    XRAY_URL="https://github.com/XTLS/Xray-core/releases/download/v1.8.8/Xray-linux-arm64-v8a.zip" ; \
     else \
     echo "Unsupported architecture: $ARCH" && exit 1 ; \
     fi && \
-    wget -O /tmp/v2ray-plugin.tar.gz "$V2RAY_URL" && \
-    tar -xzf /tmp/v2ray-plugin.tar.gz -C /tmp && \
-    mv /tmp/$BINARY /usr/local/bin/v2ray-plugin && \
-    chmod +x /usr/local/bin/v2ray-plugin && \
-    rm -rf /tmp/v2ray-plugin*
+    wget -O /tmp/xray.zip "$XRAY_URL" && \
+    unzip /tmp/xray.zip -d /tmp/xray && \
+    mv /tmp/xray/xray /usr/local/bin/xray && \
+    chmod +x /usr/local/bin/xray && \
+    rm -rf /tmp/xray /tmp/xray.zip
 
 # Install ngrok
 RUN ARCH=$(uname -m) && \
@@ -62,12 +60,12 @@ COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
 
 # Create non-root user for security
-RUN addgroup -g 1000 shadowsocks && \
-    adduser -D -u 1000 -G shadowsocks shadowsocks && \
-    chown shadowsocks:shadowsocks /etc/dnscrypt-proxy.toml
+RUN addgroup -g 1000 xray && \
+    adduser -D -u 1000 -G xray xray && \
+    chown xray:xray /etc/dnscrypt-proxy.toml
 
 # Run as non-root user
-USER shadowsocks
+USER xray
 
 EXPOSE 8388/tcp
 

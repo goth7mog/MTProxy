@@ -1,0 +1,53 @@
+{
+    "log": {
+        "loglevel": "warning"
+    },
+    "inbounds": [
+        {
+            "port": 8388,
+            "protocol": "vless",
+            "settings": {
+                "clients": [
+                    {
+                        "id": "__VLESS_UUID__"
+                    }
+                ],
+                "decryption": "none"
+            },
+            "streamSettings": {
+                "network": "ws",
+                "security": "tls",
+                "tlsSettings": {
+                    "alpn": [
+                        "http/1.1"
+                    ],
+                    "certificates": [
+                        {
+                            "certificateFile": "/etc/cert.pem",
+                            "keyFile": "/etc/key.pem"
+                        }
+                    ]
+                }
+            }
+        }
+    ],
+    "outbounds": [
+        {
+            "protocol": "freedom",
+            "settings": {}
+        },
+        {
+            "protocol": "dns",
+            "settings": {},
+            "tag": "dns"
+        }
+    ],
+    "dns": {
+        "servers": [
+            {
+                "address": "127.0.0.1",
+                "port": 5053
+            }
+        ]
+    }
+}

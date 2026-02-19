@@ -1,12 +1,14 @@
 version: '3.8'
 services:
-  shadowsocks:
+  xray:
     build: .
-    container_name: shadowsocks
+    container_name: xray
     ports:
       - "8388:8388/tcp"
-      # - "8388:8388/udp" #Only tcp is needed with v2ray-plugin
-    env_file:
-      - ../digitalocean/.env
     volumes:
       - ./dnscrypt-proxy.toml:/etc/dnscrypt-proxy.toml
+      - ./xray-config.json:/etc/xray-config.json
+      - ./certs/cert.pem:/etc/cert.pem
+      - ./certs/key.pem:/etc/key.pem
+    env_file:
+      - ../digitalocean/.env
