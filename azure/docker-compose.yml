@@ -5,6 +5,7 @@ services:
     container_name: xray
     ports:
       - "8388:8388/tcp"
+      - "4040:4040"
     volumes:
       - ./dnscrypt-proxy.toml:/etc/dnscrypt-proxy.toml
       - ./xray-config.json:/etc/xray-config.json

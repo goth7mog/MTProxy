@@ -15,19 +15,7 @@
                 "decryption": "none"
             },
             "streamSettings": {
-                "network": "ws",
-                "security": "tls",
-                "tlsSettings": {
-                    "alpn": [
-                        "http/1.1"
-                    ],
-                    "certificates": [
-                        {
-                            "certificateFile": "/etc/cert.pem",
-                            "keyFile": "/etc/key.pem"
-                        }
-                    ]
-                }
+                "network": "ws"
             }
         }
     ],

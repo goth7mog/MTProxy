@@ -55,6 +55,9 @@ RUN ARCH=$(uname -m) && \
 # Copy dnscrypt-proxy config
 COPY dnscrypt-proxy.toml /etc/dnscrypt-proxy.toml
 
+# Copy xray config
+COPY xray-config.json /etc/xray-config.json
+
 # Copy entrypoint script
 COPY entrypoint.sh /usr/local/bin/entrypoint.sh
 RUN chmod +x /usr/local/bin/entrypoint.sh
