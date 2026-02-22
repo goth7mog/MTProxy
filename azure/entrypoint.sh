@@ -11,7 +11,7 @@ fi
 dnscrypt-proxy -config /etc/dnscrypt-proxy.toml &
 
 # Give dnscrypt-proxy time to start
-sleep 2
+sleep 5
 
 # Replace UUID placeholder with environment variable
 sed "s/__VLESS_UUID__/${VLESS_UUID}/g" /etc/xray-config.json > /tmp/xray-config.json
