@@ -1,4 +1,4 @@
-server_names = ['cloudflare']
+server_names = ['cloudflare', 'google']
 listen_addresses = ['127.0.0.1:5053']
 max_clients = 200
 ipv4_servers = true
