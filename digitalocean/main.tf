@@ -25,6 +25,7 @@ resource "digitalocean_droplet" "web" {
   ]
 
   user_data = <<-EOF
+  tags   = ["mtproxy", "webserver"]
     #cloud-config
     users:
       - name: ubuntu
