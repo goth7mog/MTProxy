@@ -27,7 +27,7 @@ resource "digitalocean_droplet" "web" {
   user_data = file("${path.module}/cloud-init.yaml")
 
   provisioner "local-exec" {
-    command = "echo 'droplet ansible_host=${self.ipv4_address} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/DigitalOcean/mtproxy' > ${path.module}/ansible/inventory"
+    command = "echo 'droplet ansible_host=${self.ipv4_address} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/DigitalOcean/mtproxy' > ${path.module}/ansible/inventory.yml"
   }
 }
 
