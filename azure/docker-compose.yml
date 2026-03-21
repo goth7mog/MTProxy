@@ -1,15 +1,50 @@
 version: '3.8'
 services:
-  xray:
-    build: .
-    container_name: xray
+  # xray:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.xray
+  #   container_name: xray
+  #   ports:
+  #     - "8388:8388/tcp"
+  #     - "4040:4040"
+  #   volumes:
+  #     - ./dnscrypt-proxy.toml:/etc/dnscrypt-proxy.toml
+  #     - ./xray-config.json:/etc/xray-config.json
+  #     - ./certs/cert.pem:/etc/cert.pem
+  #     - ./certs/key.pem:/etc/key.pem
+  #   env_file:
+  #     - ../digitalocean/.env
+
+
+
+
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    container_name: nginx-proxy
+    ports:
+      - "443:443/tcp"
+      - "443:443/udp"
+    depends_on:
+      - shadowsocks
+    # If you want to mount a custom config or certs, add volumes here
+    # volumes:
+    #   - ./nginx.conf:/etc/nginx/conf.d/nginx.conf
+    #   - ./certs/cert.pem:/etc/nginx/conf.d/cert.pem
+    #   - ./certs/key.pem:/etc/nginx/conf.d/key.pem
+
+
+  shadowsocks:
+    build:
+      context: .
+      dockerfile: Dockerfile.shadowsocks
+    container_name: shadowsocks
     ports:
       - "8388:8388/tcp"
-      - "4040:4040"
-    volumes:
-      - ./dnscrypt-proxy.toml:/etc/dnscrypt-proxy.toml
-      - ./xray-config.json:/etc/xray-config.json
-      - ./certs/cert.pem:/etc/cert.pem
-      - ./certs/key.pem:/etc/key.pem
+      - "8388:8388/udp"
     env_file:
       - ../digitalocean/.env
+    volumes:
+      - ./dnscrypt-proxy.toml:/etc/dnscrypt-proxy.toml

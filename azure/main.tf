@@ -33,43 +33,68 @@ data "azurerm_resource_group" "sce_rg" {
   name = "sce-rg" # Update this to the actual name of your previous resource group if different
 }
 
-# Reference existing Container App Environment from previous project
-data "azurerm_container_app_environment" "vpn_env" {
-  name                = "sce-env"
-  resource_group_name = data.azurerm_resource_group.sce_rg.name
-}
-
-
 
 # Container Instance for Shadowsocks
 resource "azurerm_container_group" "shadowsocks" {
   name                = "shadowsocks-server"
-  location            = azurerm_resource_group.vpn_rg.location
-  resource_group_name = azurerm_resource_group.vpn_rg.name
+  location            = data.azurerm_resource_group.sce_rg.location
+  resource_group_name = data.azurerm_resource_group.sce_rg.name
   os_type             = "Linux"
-
 
   container {
     name   = "shadowsocks"
-    image  = "shadowsocks/shadowsocks-libev:latest"
+    image  = "sceacr31103.azurecr.io/shadowsocks:latest"
     cpu    = 0.25
     memory = 0.5
     environment_variables = {
-      PASSWORD = var.shadowsocks_password
-      METHOD   = var.shadowsocks_method
-      # Uncomment and set if needed:
-      # PLUGIN = "v2ray-plugin"
-      # PLUGIN_OPTS = var.plugin_opts
+      SHADOWSOCKS_PASSWORD = var.shadowsocks_password
+      SHADOWSOCKS_METHOD   = var.shadowsocks_method
+      SHADOWSOCKS_PORT     = var.shadowsocks_port
     }
     ports {
-      port = 8388
+      port = var.shadowsocks_port
     }
   }
 
+  ip_address_type = "Public"
+  dns_name_label  = "shadowsocks${random_string.dns.result}"
+
+  image_registry_credential {
+    server   = "sceacr31103.azurecr.io"
+    username = var.acr_username
+    password = var.acr_password
+  }
+}
+
+
+# Nginx container to proxy 443 -> Shadowsocks-server:8388
+resource "azurerm_container_group" "nginx_proxy" {
+  name                = "nginx-proxy"
+  location            = data.azurerm_resource_group.sce_rg.location
+  resource_group_name = data.azurerm_resource_group.sce_rg.name
+  os_type             = "Linux"
+
+  container {
+    name   = "nginx"
+    image  = "sceacr31103.azurecr.io/nginx-proxy:latest"
+    cpu    = 0.25
+    memory = 0.5
+
+    ports {
+      port = 443
+    }
+  }
+
+  image_registry_credential {
+    server   = "sceacr31103.azurecr.io"
+    username = var.acr_username
+    password = var.acr_password
+  }
 
   ip_address_type = "Public"
-  dns_name_label  = "shadowsocks-${random_string.dns.result}"
 }
+
+
 
 # Random string for DNS label
 resource "random_string" "dns" {
@@ -78,6 +103,7 @@ resource "random_string" "dns" {
   special = false
 }
 
+
 variable "shadowsocks_password" {
   description = "Password for Shadowsocks."
   type        = string
@@ -85,6 +111,22 @@ variable "shadowsocks_password" {
 
 variable "shadowsocks_method" {
   description = "Encryption method for Shadowsocks."
+  type        = string
+}
+
+variable "shadowsocks_port" {
+  description = "Port for Shadowsocks."
+  type        = number
+  default     = 8388
+}
+
+variable "acr_username" {
+  description = "ACR registry username."
+  type        = string
+}
+
+variable "acr_password" {
+  description = "ACR registry password."
   type        = string
 }
 
@@ -103,4 +145,10 @@ output "container_instance_fqdn" {
 output "container_instance_ip" {
   description = "The public IP address of the Azure Container Instance."
   value       = azurerm_container_group.shadowsocks.ip_address
+}
+
+# Output the public IP address of the nginx_proxy Container Instance
+output "nginx_proxy_ip" {
+  description = "The public IP address of the nginx proxy Container Instance."
+  value       = azurerm_container_group.nginx_proxy.ip_address
 }
