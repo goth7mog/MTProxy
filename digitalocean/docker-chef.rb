@@ -34,6 +34,34 @@ execute 'install_docker_compose' do
   not_if { ::File.exist?('/usr/local/bin/docker-compose') }
 end
 
+
 file '/usr/local/bin/docker-compose' do
   mode '0755'
+end
+
+
+# Copy docker-compose-mtproxy.yml to /home/ubuntu/app/docker-compose.yml
+remote_file '/home/ubuntu/app/docker-compose.yml' do
+  source '/root/docker-compose-mtproxy.yml'
+  owner 'ubuntu'
+  group 'ubuntu'
+  mode '0644'
+  action :create
+end
+
+# Copy .env file to /home/ubuntu/app/.env
+remote_file '/home/ubuntu/app/.env' do
+  source '/root/.env'
+  owner 'ubuntu'
+  group 'ubuntu'
+  mode '0644'
+  action :create
+end
+
+# Run 'docker-compose up' in /home/ubuntu/app
+execute 'docker_compose_up' do
+  command 'docker-compose up -d'
+  cwd '/home/ubuntu/app'
+  user 'ubuntu'
+  environment ({'HOME' => '/home/ubuntu'})
 end
