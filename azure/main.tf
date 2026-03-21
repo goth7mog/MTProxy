@@ -15,7 +15,7 @@ terraform {
 # Azure Provider
 provider "azurerm" {
   features {}
-  subscription_id = "584f8a59-dcda-4698-a720-39e3963a9708"
+  subscription_id = var.subscription_id
 }
 
 data "azurerm_client_config" "current" {}
@@ -43,7 +43,7 @@ resource "azurerm_container_group" "shadowsocks" {
 
   container {
     name   = "shadowsocks"
-    image  = "sceacr31103.azurecr.io/shadowsocks:latest"
+    image  = "${var.acr_name}.azurecr.io/shadowsocks:latest"
     cpu    = 0.25
     memory = 0.5
     environment_variables = {
@@ -60,7 +60,7 @@ resource "azurerm_container_group" "shadowsocks" {
   dns_name_label  = "shadowsocks${random_string.dns.result}"
 
   image_registry_credential {
-    server   = "sceacr31103.azurecr.io"
+    server   = "${var.acr_name}.azurecr.io"
     username = var.acr_username
     password = var.acr_password
   }
@@ -76,7 +76,7 @@ resource "azurerm_container_group" "nginx_proxy" {
 
   container {
     name   = "nginx"
-    image  = "sceacr31103.azurecr.io/nginx-proxy:latest"
+    image  = "${var.acr_name}.azurecr.io/nginx-proxy:latest"
     cpu    = 0.25
     memory = 0.5
 
@@ -86,7 +86,7 @@ resource "azurerm_container_group" "nginx_proxy" {
   }
 
   image_registry_credential {
-    server   = "sceacr31103.azurecr.io"
+    server   = "${var.acr_name}.azurecr.io"
     username = var.acr_username
     password = var.acr_password
   }
@@ -101,6 +101,18 @@ resource "random_string" "dns" {
   length  = 6
   upper   = false
   special = false
+}
+
+
+# New variables for subscription_id and acr_name
+variable "subscription_id" {
+  description = "Azure Subscription ID."
+  type        = string
+}
+
+variable "acr_name" {
+  description = "Azure Container Registry name (without .azurecr.io)."
+  type        = string
 }
 
 
