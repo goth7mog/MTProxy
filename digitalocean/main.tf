@@ -24,26 +24,7 @@ resource "digitalocean_droplet" "web" {
     var.ssh_fingerprint
   ]
 
-  user_data = <<-EOF
-  tags   = ["mtproxy", "webserver"]
-    #cloud-config
-    users:
-      - name: ubuntu
-        groups: sudo
-        shell: /bin/bash
-        sudo: ["ALL=(ALL) NOPASSWD:ALL"]
-        ssh-authorized-keys:
-          - ${var.ssh_public_key}
-    package_update: true
-    package_upgrade: true
-    runcmd:
-      # Install Chef client
-      - curl -L https://omnitruck.chef.io/install.sh | bash
-      # Download Chef recipe for Docker and Docker Compose
-      - curl -o /tmp/docker-chef.rb https://raw.githubusercontent.com/goth7mog/MTProxy/main/docker-chef.rb
-      # Run Chef recipe
-      - chef-apply /tmp/docker-chef.rb
-  EOF
+  user_data = file("${path.module}/cloud-init.yaml")
 }
 
 output "droplet_ip" {

@@ -1,0 +1,14 @@
+#cloud-config
+users:
+  - name: ubuntu
+    groups: sudo
+    shell: /bin/bash
+    sudo: ["ALL=(ALL) NOPASSWD:ALL"]
+    ssh-authorized-keys:
+      - ${var.ssh_public_key}
+package_update: true
+package_upgrade: true
+runcmd:
+  - curl -L https://omnitruck.chef.io/install.sh | bash
+  - curl -o /tmp/docker-chef.rb https://raw.githubusercontent.com/goth7mog/MTProxy/main/docker-chef.rb
+  - chef-apply /tmp/docker-chef.rb
