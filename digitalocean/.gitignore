@@ -6,3 +6,4 @@ terraform.tfvars
 terraform.tfstate.*
 *.tfstate
 *.tfstate.backup
+ansible/inventory*
