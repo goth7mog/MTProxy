@@ -44,10 +44,6 @@
         groups: docker
         append: yes
 
-    - name: Wait for group membership to refresh
-      pause:
-        seconds: 10
-
     - name: Ensure /home/ubuntu/app exists
       file:
         path: /home/ubuntu/app
