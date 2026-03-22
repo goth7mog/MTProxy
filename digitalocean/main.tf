@@ -24,7 +24,9 @@ resource "digitalocean_droplet" "web" {
     var.ssh_fingerprint
   ]
 
-  user_data = file("${path.module}/cloud-init.yaml")
+  user_data = templatefile("${path.module}/cloud-init.yaml", {
+    ssh_public_key = var.ssh_public_key
+  })
 
   provisioner "local-exec" {
     command = "echo 'droplet ansible_host=${self.ipv4_address} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/DigitalOcean/mtproxy' > ${path.module}/ansible/inventory.yml"

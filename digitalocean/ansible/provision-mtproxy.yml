@@ -44,6 +44,10 @@
         groups: docker
         append: yes
 
+    - name: Wait for group membership to refresh
+      pause:
+        seconds: 10
+
     - name: Ensure /home/ubuntu/app exists
       file:
         path: /home/ubuntu/app
@@ -69,7 +73,9 @@
         mode: '0644'
 
     - name: Run docker-compose up
+      become: true
       become_user: ubuntu
+      become_method: su
       shell: |
         cd /home/ubuntu/app && docker-compose up -d
       environment:

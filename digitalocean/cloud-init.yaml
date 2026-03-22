@@ -5,6 +5,6 @@ users:
     shell: /bin/bash
     sudo: ["ALL=(ALL) NOPASSWD:ALL"]
     ssh-authorized-keys:
-      - ${var.ssh_public_key}
+      - ${ssh_public_key}
 package_update: true
 package_upgrade: true
