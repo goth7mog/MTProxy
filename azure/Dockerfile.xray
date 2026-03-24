@@ -59,8 +59,8 @@ COPY dnscrypt-proxy.toml /etc/dnscrypt-proxy.toml
 COPY xray-config.json /etc/xray-config.json
 
 # Copy entrypoint script
-COPY entrypoint.sh /usr/local/bin/entrypoint.sh
-RUN chmod +x /usr/local/bin/entrypoint.sh
+COPY entrypoint-xray.sh /usr/local/bin/entrypoint-xray.sh
+RUN chmod +x /usr/local/bin/entrypoint-xray.sh
 
 # Create non-root user for security
 RUN addgroup -g 1000 xray && \
@@ -72,4 +72,4 @@ USER xray
 
 EXPOSE 8388/tcp
 
-ENTRYPOINT ["/usr/local/bin/entrypoint.sh"]
+ENTRYPOINT ["/usr/local/bin/entrypoint-xray.sh"]
