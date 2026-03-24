@@ -1,0 +1,25 @@
+version: '3.8'
+services:
+  nginx:
+    build:
+      context: .
+      dockerfile: Dockerfile.nginx
+    container_name: nginx-proxy
+    ports:
+      - "443:443/tcp"
+      - "443:443/udp"
+    depends_on:
+      - shadowsocks
+
+  shadowsocks:
+    build:
+      context: .
+      dockerfile: Dockerfile.shadowsocks
+    container_name: shadowsocks
+    ports:
+      - "8388:8388/tcp"
+      - "8388:8388/udp"
+    env_file:
+      - ../digitalocean/.env
+    volumes:
+      - ./dnscrypt-proxy.toml:/etc/dnscrypt-proxy.toml

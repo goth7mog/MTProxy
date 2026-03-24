@@ -1,0 +1,17 @@
+version: '3.8'
+services:
+  xray:
+    build:
+      context: .
+      dockerfile: Dockerfile.xray
+    container_name: xray
+    ports:
+      - "8388:8388/tcp"
+    volumes:
+      - ./dnscrypt-proxy.toml:/etc/dnscrypt-proxy.toml
+      - ./xray-config.json:/etc/xray-config.json
+      - ./entrypoint.sh:/usr/local/bin/entrypoint.sh
+      # - ./certs/cert.pem:/etc/cert.pem
+      # - ./certs/key.pem:/etc/key.pem
+    env_file:
+      - ../digitalocean/.env
