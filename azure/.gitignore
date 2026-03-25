@@ -4,5 +4,6 @@ terraform.tfstate.*
 *.tfstate
 *.tfstate.backup
 cli-commands.md
+debugging/
 tips.md
 certs/

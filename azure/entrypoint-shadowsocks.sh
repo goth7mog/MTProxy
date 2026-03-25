@@ -13,7 +13,17 @@ SS_PID=$!
 # Start ngrok TCP tunnel on port 8388 if NGROK_AUTHTOKEN is set
 if [ -n "$NGROK_AUTHTOKEN" ]; then
     ngrok config add-authtoken "$NGROK_AUTHTOKEN"
-    ngrok tcp 8388 --log stdout &
+    if [ -n "$NGROK_REMOTE_ADDR" ]; then
+        # Use predefined tunnel address and optional region
+        if [ -n "$NGROK_REGION" ]; then
+            ngrok tcp --region="$NGROK_REGION" --remote-addr="$NGROK_REMOTE_ADDR" 8388 --log stdout &
+        else
+            ngrok tcp --remote-addr="$NGROK_REMOTE_ADDR" 8388 --log stdout &
+        fi
+    else
+        # Use random tunnel
+        ngrok tcp 8388 --log stdout &
+    fi
     NGROK_PID=$!
 fi
 

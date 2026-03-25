@@ -1,15 +1,15 @@
 version: '3.8'
 services:
-  nginx:
-    build:
-      context: .
-      dockerfile: Dockerfile.nginx
-    container_name: nginx-proxy
-    ports:
-      - "443:443/tcp"
-      - "443:443/udp"
-    depends_on:
-      - shadowsocks
+  # nginx:
+  #   build:
+  #     context: .
+  #     dockerfile: Dockerfile.nginx
+  #   container_name: nginx-proxy
+  #   ports:
+  #     - "443:443/tcp"
+  #     - "443:443/udp"
+  #   depends_on:
+  #     - shadowsocks
 
   shadowsocks:
     build:
