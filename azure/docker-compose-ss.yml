@@ -20,6 +20,6 @@ services:
       - "8388:8388/tcp"
       - "8388:8388/udp"
     env_file:
-      - ../digitalocean/.env
+      - .env
     volumes:
       - ./dnscrypt-proxy.toml:/etc/dnscrypt-proxy.toml
