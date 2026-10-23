@@ -1,0 +1,6 @@
+---
+- name: Provision WireGuard full-tunnel gateway
+  hosts: droplet
+  become: true
+  roles:
+    - wireguard-gateway

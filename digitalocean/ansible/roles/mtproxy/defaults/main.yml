@@ -1,0 +1,2 @@
+---
+mtproxy_env_file: "{{ playbook_dir }}/../.env"

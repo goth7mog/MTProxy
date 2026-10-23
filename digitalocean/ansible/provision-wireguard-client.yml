@@ -1,0 +1,6 @@
+---
+- name: Provision WireGuard full-tunnel client
+  hosts: client
+  become: true
+  roles:
+    - wireguard_client

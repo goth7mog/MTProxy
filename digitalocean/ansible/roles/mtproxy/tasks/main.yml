@@ -1,0 +1,73 @@
+---
+- name: Ensure apt cache is updated
+  ansible.builtin.apt:
+    update_cache: true
+
+- name: Install required packages
+  ansible.builtin.apt:
+    name:
+      - apt-transport-https
+      - ca-certificates
+      - curl
+      - software-properties-common
+    state: present
+
+- name: Add Docker GPG key
+  ansible.builtin.apt_key:
+    url: https://download.docker.com/linux/ubuntu/gpg
+    state: present
+
+- name: Add Docker repository
+  ansible.builtin.apt_repository:
+    repo: deb [arch=amd64] https://download.docker.com/linux/ubuntu {{ ansible_distribution_release }} stable
+    state: present
+
+- name: Install Docker
+  ansible.builtin.apt:
+    name: docker-ce
+    state: present
+    update_cache: true
+
+- name: Install Docker Compose
+  ansible.builtin.get_url:
+    url: https://github.com/docker/compose/releases/latest/download/docker-compose-{{ ansible_system | lower }}-{{ ansible_architecture }}
+    dest: /usr/local/bin/docker-compose
+    mode: "0755"
+
+- name: Add ubuntu user to docker group
+  ansible.builtin.user:
+    name: ubuntu
+    groups: docker
+    append: true
+
+- name: Ensure application directory exists
+  ansible.builtin.file:
+    path: /home/ubuntu/app
+    state: directory
+    owner: ubuntu
+    group: ubuntu
+    mode: "0755"
+
+- name: Copy MTProxy Docker Compose file
+  ansible.builtin.copy:
+    src: docker-compose.yml
+    dest: /home/ubuntu/app/docker-compose.yml
+    owner: ubuntu
+    group: ubuntu
+    mode: "0644"
+
+- name: Copy MTProxy environment file
+  ansible.builtin.copy:
+    src: "{{ mtproxy_env_file }}"
+    dest: /home/ubuntu/app/.env
+    owner: ubuntu
+    group: ubuntu
+    mode: "0644"
+
+- name: Run MTProxy Docker Compose
+  become_user: ubuntu
+  ansible.builtin.command:
+    cmd: docker-compose up -d
+    chdir: /home/ubuntu/app
+  environment:
+    HOME: /home/ubuntu

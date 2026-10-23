@@ -1,0 +1,10 @@
+---
+wireguard_interface: wg0
+wireguard_port: 51820
+wireguard_ipv4_network: 10.66.66.0/24
+wireguard_server_ipv4: 10.66.66.1/24
+wireguard_ipv6_network: fd42:42:42::/64
+wireguard_server_ipv6: fd42:42:42::1/64
+wireguard_peers: []
+wireguard_server_private_key: ""
+wireguard_server_private_key_path: /etc/wireguard/server_private.key

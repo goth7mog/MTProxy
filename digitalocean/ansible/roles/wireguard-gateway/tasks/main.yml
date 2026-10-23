@@ -1,0 +1,124 @@
+---
+- name: Validate gateway private key
+  ansible.builtin.assert:
+    that:
+      - wireguard_server_private_key | length > 0
+    fail_msg: >-
+      Set wireguard_server_private_key in a local variables file before running
+      this playbook.
+
+- name: Install WireGuard and firewall persistence packages
+  ansible.builtin.apt:
+    name:
+      - iptables
+      - iptables-persistent
+      - wireguard
+    state: present
+    update_cache: true
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+
+- name: Enable IPv4 and IPv6 forwarding
+  ansible.posix.sysctl:
+    name: "{{ item.name }}"
+    value: "1"
+    state: present
+    reload: true
+  loop:
+    - name: net.ipv4.ip_forward
+    - name: net.ipv6.conf.all.forwarding
+    - name: net.ipv6.conf.default.forwarding
+
+- name: Ensure WireGuard directory exists
+  ansible.builtin.file:
+    path: /etc/wireguard
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Install gateway private key
+  ansible.builtin.copy:
+    content: "{{ wireguard_server_private_key | trim }}\n"
+    dest: "{{ wireguard_server_private_key_path }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Read gateway private key
+  ansible.builtin.slurp:
+    src: "{{ wireguard_server_private_key_path }}"
+  register: wireguard_private_key
+  no_log: true
+
+- name: Determine public network interface
+  ansible.builtin.set_fact:
+    wireguard_external_interface: "{{ ansible_default_ipv4.interface }}"
+
+- name: Configure WireGuard gateway
+  ansible.builtin.template:
+    src: wireguard-gateway.conf.j2
+    dest: "/etc/wireguard/{{ wireguard_interface }}.conf"
+    owner: root
+    group: root
+    mode: "0600"
+  notify: Restart WireGuard
+
+- name: Allow WireGuard UDP traffic
+  ansible.builtin.iptables:
+    chain: INPUT
+    protocol: udp
+    destination_port: "{{ wireguard_port }}"
+    jump: ACCEPT
+    comment: Allow WireGuard
+  notify: Save firewall rules
+
+- name: Allow forwarding from WireGuard to the Internet
+  ansible.builtin.iptables:
+    chain: FORWARD
+    in_interface: "{{ wireguard_interface }}"
+    out_interface: "{{ wireguard_external_interface }}"
+    jump: ACCEPT
+    comment: Forward WireGuard IPv4 traffic
+  notify: Save firewall rules
+
+- name: Allow return forwarding to WireGuard
+  ansible.builtin.iptables:
+    chain: FORWARD
+    in_interface: "{{ wireguard_external_interface }}"
+    out_interface: "{{ wireguard_interface }}"
+    match: conntrack
+    ctstate: RELATED,ESTABLISHED
+    jump: ACCEPT
+    comment: Forward established IPv4 traffic to WireGuard
+  notify: Save firewall rules
+
+- name: Allow IPv6 forwarding from WireGuard to the Internet
+  ansible.builtin.iptables:
+    ip_version: ipv6
+    chain: FORWARD
+    in_interface: "{{ wireguard_interface }}"
+    out_interface: "{{ wireguard_external_interface }}"
+    jump: ACCEPT
+    comment: Forward WireGuard IPv6 traffic
+  notify: Save firewall rules
+
+- name: Allow IPv6 return forwarding to WireGuard
+  ansible.builtin.iptables:
+    ip_version: ipv6
+    chain: FORWARD
+    in_interface: "{{ wireguard_external_interface }}"
+    out_interface: "{{ wireguard_interface }}"
+    match: conntrack
+    ctstate: RELATED,ESTABLISHED
+    jump: ACCEPT
+    comment: Forward established IPv6 traffic to WireGuard
+  notify: Save firewall rules
+
+- name: Enable WireGuard at boot
+  ansible.builtin.systemd:
+    name: "wg-quick@{{ wireguard_interface }}"
+    enabled: true
+    state: started
+    daemon_reload: true

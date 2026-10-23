@@ -1,0 +1,14 @@
+[Interface]
+Address = {{ wireguard_client_address_ipv4 }}, {{ wireguard_client_address_ipv6 }}
+PrivateKey = {{ wireguard_client_private_key_file.content | b64decode | trim }}
+DNS = {{ wireguard_client_dns | join(', ') }}
+
+# Route the endpoint outside the tunnel and reject non-WireGuard traffic.
+PostUp = iptables -I OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT; ip6tables -I OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT
+PostDown = iptables -D OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT; ip6tables -D OUTPUT ! -o %i -m mark ! --mark $(wg show %i fwmark) -m addrtype ! --dst-type LOCAL -j REJECT
+
+[Peer]
+PublicKey = {{ wireguard_gateway_public_key }}
+Endpoint = {{ wireguard_gateway_endpoint }}:{{ wireguard_gateway_port }}
+AllowedIPs = 0.0.0.0/0, ::/0
+PersistentKeepalive = 25

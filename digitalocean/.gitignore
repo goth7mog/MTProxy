@@ -7,3 +7,7 @@ terraform.tfstate.*
 *.tfstate
 *.tfstate.backup
 ansible/inventory*
+ansible/*wireguard-vars.yml
+*.key
+.DS_Store
+ansible/*-vars.yml

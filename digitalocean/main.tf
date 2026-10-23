@@ -31,6 +31,18 @@ resource "digitalocean_droplet" "web" {
   provisioner "local-exec" {
     command = "echo 'droplet ansible_host=${self.ipv4_address} ansible_user=ubuntu ansible_ssh_private_key_file=~/.ssh/DigitalOcean/mtproxy' > ${path.module}/ansible/inventory.yml"
   }
+
+  provisioner "local-exec" {
+    command = <<-EOT
+      vars_file="${path.module}/ansible/wireguard-gateway-vars.yml"
+      if [ -f "$vars_file" ] && grep -q '^wireguard_gateway_endpoint:' "$vars_file"; then
+        sed -i.bak 's|^wireguard_gateway_endpoint:.*|wireguard_gateway_endpoint: "${self.ipv4_address}"|' "$vars_file"
+        rm -f "$vars_file.bak"
+      else
+        printf '\nwireguard_gateway_endpoint: "%s"\n' "${self.ipv4_address}" >> "$vars_file"
+      fi
+    EOT
+  }
 }
 
 output "droplet_ip" {

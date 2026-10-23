@@ -1,0 +1,14 @@
+[Interface]
+Address = {{ wireguard_server_ipv4 }}, {{ wireguard_server_ipv6 }}
+ListenPort = {{ wireguard_port }}
+PrivateKey = {{ wireguard_private_key.content | b64decode | trim }}
+PostUp = iptables -A FORWARD -i %i -o {{ wireguard_external_interface }} -j ACCEPT; iptables -A FORWARD -i {{ wireguard_external_interface }} -o %i -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT; iptables -t nat -A POSTROUTING -s {{ wireguard_ipv4_network }} -o {{ wireguard_external_interface }} -j MASQUERADE; ip6tables -t nat -A POSTROUTING -s {{ wireguard_ipv6_network }} -o {{ wireguard_external_interface }} -j MASQUERADE
+PostDown = iptables -D FORWARD -i %i -o {{ wireguard_external_interface }} -j ACCEPT; iptables -D FORWARD -i {{ wireguard_external_interface }} -o %i -m conntrack --ctstate RELATED,ESTABLISHED -j ACCEPT; iptables -t nat -D POSTROUTING -s {{ wireguard_ipv4_network }} -o {{ wireguard_external_interface }} -j MASQUERADE; ip6tables -t nat -D POSTROUTING -s {{ wireguard_ipv6_network }} -o {{ wireguard_external_interface }} -j MASQUERADE
+
+{% for peer in wireguard_peers %}
+[Peer]
+# {{ peer.name }}
+PublicKey = {{ peer.public_key }}
+AllowedIPs = {{ peer.allowed_ips | join(', ') }}
+
+{% endfor %}

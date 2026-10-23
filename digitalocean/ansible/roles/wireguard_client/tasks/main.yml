@@ -1,0 +1,78 @@
+---
+- name: Validate required gateway settings
+  ansible.builtin.assert:
+    that:
+      - wireguard_gateway_public_key is defined
+      - wireguard_gateway_public_key | length > 0
+      - wireguard_gateway_endpoint is defined
+      - wireguard_gateway_endpoint | length > 0
+      - wireguard_client_private_key is defined
+      - wireguard_client_private_key | length > 0
+    fail_msg: >-
+      Set wireguard_gateway_public_key, wireguard_gateway_endpoint, and
+      wireguard_client_private_key in local client variables before
+      running this playbook.
+
+- name: Install WireGuard and DNS resolver support
+  ansible.builtin.apt:
+    name:
+      - wireguard
+      - resolvconf
+    state: present
+    update_cache: true
+  environment:
+    DEBIAN_FRONTEND: noninteractive
+
+- name: Ensure WireGuard directory exists
+  ansible.builtin.file:
+    path: /etc/wireguard
+    state: directory
+    owner: root
+    group: root
+    mode: "0700"
+
+- name: Install client private key
+  ansible.builtin.copy:
+    content: "{{ wireguard_client_private_key | trim }}\n"
+    dest: "{{ wireguard_client_private_key_path }}"
+    owner: root
+    group: root
+    mode: "0600"
+  no_log: true
+
+- name: Read client private key
+  ansible.builtin.slurp:
+    src: "{{ wireguard_client_private_key_path }}"
+  register: wireguard_client_private_key_file
+  no_log: true
+
+- name: Derive client public key
+  ansible.builtin.shell:
+    cmd: wg pubkey < {{ wireguard_client_private_key_path }}
+  register: wireguard_client_public_key
+  changed_when: false
+  no_log: true
+
+- name: Save client public key
+  ansible.builtin.copy:
+    content: "{{ wireguard_client_public_key.stdout }}\n"
+    dest: /etc/wireguard/client_public.key
+    owner: root
+    group: root
+    mode: "0644"
+
+- name: Configure full-tunnel WireGuard client
+  ansible.builtin.template:
+    src: wireguard-client.conf.j2
+    dest: "/etc/wireguard/{{ wireguard_client_interface }}.conf"
+    owner: root
+    group: root
+    mode: "0600"
+  notify: Restart WireGuard client
+
+- name: Enable WireGuard client at boot
+  ansible.builtin.systemd:
+    name: "wg-quick@{{ wireguard_client_interface }}"
+    enabled: true
+    state: started
+    daemon_reload: true

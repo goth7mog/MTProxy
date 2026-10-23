@@ -1,0 +1,9 @@
+---
+wireguard_client_interface: wg0
+wireguard_client_address_ipv4: 10.66.66.2/24
+wireguard_client_address_ipv6: fd42:42:42::2/64
+wireguard_client_dns: #AdGuard
+  - 94.140.14.14
+  - 2a10:50c0::ad1:ff
+wireguard_gateway_port: 51820
+wireguard_client_private_key_path: /etc/wireguard/client_private.key
