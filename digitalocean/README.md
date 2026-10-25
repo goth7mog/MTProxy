@@ -50,7 +50,8 @@ sudo digitalocean/remove-wireguard-killswitch.sh # That internet remains availab
 
 To turn WireGuard back on:
 ```bash
-sudo systemctl start wg-quick@wg0
+sudo systemctl daemon-reload
+sudo systemctl restart wg-quick@wg0
 ```
 
 
