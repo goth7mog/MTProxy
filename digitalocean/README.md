@@ -54,6 +54,11 @@ sudo systemctl daemon-reload
 sudo systemctl restart wg-quick@wg0
 ```
 
+To disable it permanently:
+```bash
+sudo systemctl disable --now wg-quick@wg0
+```
+
 
 
 ## -- Destroying the Droplet and Cleaning SSH Known Hosts -- ##
